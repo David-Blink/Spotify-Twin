@@ -45,7 +45,7 @@
     },
     methods: {
       login() {
-        let popup = window.open(`https://accounts.spotify.com/authorize?client_id=${this.client_id}&response_type=token&redirect_uri=${this.redirect_uri}&scope=${this.scopes}&show_dialog=true`);
+        let popup = window.open(`https://accounts.spotify.com/authorize?client_id=${this.client_id}&response_type=token&redirect_uri=${this.redirect_uri}&scope=${this.scopes}&show_dialog=true`, "_self");
         window.spotifyCallback = payload => {
           popup.close();
           fetch('https://api.spotify.com/v1/me', {
