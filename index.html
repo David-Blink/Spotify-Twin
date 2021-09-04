@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="tracks/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Prakaash">
+    <meta
+      name="description"
+      content="Spotify is the web music player you'll ever need.Listening is Millions of songs everywhere."
+    />
+    <title>Spotify Twin - Authentication</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body translate="no">
+  <script src="https://static.codepen.io/assets/common/stopExecutionOnTimeout-157cd5b220a5c80d4ff8e0e70ac069bffd87a61252088146915e8726e5d9f147.js"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17-beta.0/vue.js'></script> 
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/localforage/1.7.3/localforage.min.js'></script>
+  <section class="sec sec-1" id="sec-1">
+    <div>
+      <main id="app">
+        <template v-if="me">
+          {{ me }}
+        </template>
+        <template v-else>
+          <h1>Spotify <span>Twin</span></h1>
+          <p>Created by Prakaash</p>
+          <button @click="login">Login with Spotify</button>
+        </template>
+      </main>
+    </div>
+  </section>
+  <!-- script -->
+  <script>
+  const app = new Vue({
+    el: '#app',
+    data() {
+      return {
+        client_id: 'a11aa8b488034c38b69e6ed54baaeda9',
+        scopes: 'user-read-private',
+        redirect_uri: 'https://www.google.com/',
+        me: null };
+    },
+    methods: {
+      login() {
+        let popup = window.open(`https://accounts.spotify.com/authorize?client_id=${this.client_id}&response_type=token&redirect_uri=${this.redirect_uri}&scope=${this.scopes}&show_dialog=true`, 'Login with Spotify by Prakaash', 'width=800,height=600');
+        window.spotifyCallback = payload => {
+          popup.close();
+          fetch('https://api.spotify.com/v1/me', {
+            headers: {
+              'Authorization': `Bearer ${payload}` } }).
+          then(response => {
+            return response.json();
+          }).then(data => {
+            this.me = data;
+          });
+        };
+      } },
+      mounted() {
+        this.token = window.location.hash.substr(1).split('&')[0].split("=")[1];
+        if (this.token) {
+          window.opener.spotifyCallback(this.token);
+        }
+      } 
+  });
+  </script>
+</body>
+</html>

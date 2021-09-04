@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="tracks/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Prakaash">
+    <meta
+      name="description"
+      content="Spotify is the web music player you'll ever need.Listening is Millions of songs everywhere."
+    />
+    <title>Spotify Twin - Web Player</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <section class="sec sec-2 hide" id="sec-2">
+        <audio src="" id="audio"></audio>
+        <header class="header">
+            <h1>Spotify <span>Twin</span></h1>
+        </header>
+
+        <div class="music-list" id="music-list"></div>
+
+        <div class="players" id="players">
+            <button class="back-btn" onclick="showplayer()"><i class="material-icons">expand_more</i></button>
+
+            <div class="bottom">
+
+                <div class="thumbnail">
+                    <img id="thumbnail" src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQRdF1EyT4zeHHIcicA4wA8uMjxoGAblXsTIiXPhdTCzbG1YI18&usqp=CAU" alt="">
+                </div>
+
+                <div class="content" onclick="showplayer()">
+                    <h3 id="name">Name</h3>
+                    <small id="category">Category</small>
+                </div>
+
+                <div class="volume-box">
+                    <span onclick="volumeDown()"><i class="material-icons">remove</i></span>
+                    <input type="range" class="progress-bar" id="volumeBar" step="1" value="80" min="0" max="100" oninput="audio.volume = this.value/100">
+                    <span onclick="volumeUp()"><i class="material-icons">add</i></span>
+                </div>
+
+                <div class="tools">
+                    <button class="equaliser" onclick="equalizerBtn(event)">
+                        <i class="material-icons">equalizer</i>
+                    </button>
+                    <button class="repeat" onclick="repeat(event)">
+                        <i class="material-icons">repeat</i>
+                    </button>
+                    <button class="volume" onclick="volumeBox(event)">
+                        <i class="material-icons">volume_up</i>
+                    </button>
+                    <button class="favorite" onclick="addFvt(event)">
+                        <i class="material-icons">favorite</i>
+                    </button>
+                </div>
+
+                <div class="progress-box">
+                    <input type="range" class="progress-bar" id="progress" min="0" max="" value="0" onchange="changeProgressBar()" />
+                    <div id="ctview">00:00</div>
+                    <div id="ttview">00:00</div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="prevBtn" onclick="prevPlay()">
+                        <i class="material-icons">skip_previous</i>
+                    </button>
+                    <button class="playBtn" onclick="playPause(event)">
+                        <i id="playBtn" class="material-icons">play_arrow</i>
+                    </button>
+                    <button class="nextBtn" onclick="nextPlay()">
+                        <i class="material-icons">skip_next</i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- script  -->
+    <script id="main">
+        // Declarations
+        const playerWindow = document.getElementById("players");
+        const audio = document.getElementById("audio");
+        const name = document.getElementById("name");
+        const category = document.getElementById("category");
+        const thumbnail = document.getElementById("thumbnail");
+        const playBtn = document.getElementById("playBtn");
+        const progress = document.getElementById("progress");
+        const ttview = document.getElementById("ttview");
+        const tcview = document.getElementById("tcview");
+        const volumeBar = document.getElementById("volumeBar");
+        const musicList = document.getElementById("music-list");
+        const body = document.querySelector("body");
+        let musicData = [{
+            id: 1,
+            category: "Shawn Mendes, Camila Cabello",
+            name: "Señorita",
+            src: "tracks/Señorita.mp3",
+            image: "tracks/Señorita.jpg",
+        }, {
+            id: 2,
+            category: "Marshmello & Anne-Marie",
+            name: "F.R.I.E.N.D.S",
+            src: "tracks/Friends.mp3",
+            image: "tracks/Friends.jpg",
+        }, {
+            id: 3,
+            category: "Dharia",
+            name: "Sugar And Brownies",
+            src: "tracks/Sugar And Brownies.mp3",
+            image: "tracks/Sugar And Brownies.jpg",
+        }, {
+            id: 4,
+            category: "The Kid LAROI & Justin Bieber",
+            name: "Stay",
+            src: "tracks/Stay.mp3",
+            image: "tracks/Stay.jpg",
+        }, {
+            id: 5,
+            category: "Syko",
+            name: "Brooklyn - BloodPop",
+            src: "tracks/Brooklyn.mp3",
+            image: "tracks/Brooklyn.jpg",
+        }, {
+            id: 6,
+            category: "Ellie Goulding",
+            name: "Love Me Like You Do",
+            src: "tracks/Love Me Like You Do.mp3",
+            image: "tracks/Love Me Like You Do.jpg",
+        }, {
+            id: 7,
+            category: "Maroon 5",
+            name: "Memories",
+            src: "tracks/Memories.mp3",
+            image: "tracks/Memories.jpg",
+        }, {
+            id: 8,
+            category: "Alec Benjamin",
+            name: "Let Me Down Slowly",
+            src: "tracks/Let Me Down Slowly.mp3",
+            image: "tracks/Let Me Down Slowly.jpg",
+        }, {
+            id: 9,
+            category: "Skrillex, Diplo, Justin Bieber",
+            name: "Where Are U Now",
+            src: "tracks/Where Are U Now.mp3",
+            image: "tracks/Where Are U Now.jpg",
+        }, {
+            id: 10,
+            category: "Natalie Taylor",
+            name: "Surrender",
+            src: "tracks/Surrender.mp3",
+            image: "tracks/Surrender.jpg",
+        }, ]
+        let repeatMusic = false;
+        let index = 1;
+        let songs = musicData;
+
+        const setActive = (i) => {
+            setEqualizer()
+            let a = musicList.querySelector(".active");
+            if (a !== null) {
+                a.classList.remove("active");
+            }
+            const ele = document.getElementsByClassName("music")[i - 1];
+            ele.classList.add("active");
+        }
+
+        const setData = data => {
+            name.textContent = data.name;
+            category.textContent = data.category;
+            thumbnail.src = data.image;
+        }
+
+        const playMusic = async(i) => {
+            if (i == 18 || i == 10) {
+                body.classList.toggle("dark");
+                setTimeout(() => body.classList.toggle("dark"), 7000);
+            }
+            let data = musicData.find(m => m.id === i) || musicData[1];
+            setActive(i)
+            setData(data);
+            playBtn.textContent = "pause";
+            audio.src = data.src;
+            await audio.load();
+            audio.play();
+        }
+
+        const playPause = e => {
+            if (audio.paused) {
+                playBtn.textContent = "pause";
+                audio.play();
+                setEqualizer()
+            } else {
+                playBtn.textContent = "play_arrow";
+                audio.pause();
+                setEqualizer(true)
+            }
+        }
+
+        const showplayer = () => {
+            playerWindow.classList.toggle("active");
+        }
+        const addFvt = e => {
+            e.target.classList.toggle("active")
+        }
+        const repeat = e => {
+            e.target.classList.toggle("active")
+            repeatMusic = !repeatMusic;
+            audio.loop = repeatMusic;
+        }
+        const volumeBox = e => {
+            e.target.classList.toggle("active");
+            document.querySelector(".volume-box").classList.toggle("show");
+        }
+        const nextPlay = () => {
+            index++;
+            if (index > musicData.length) {
+                index = 1;
+            }
+            playMusic(index);
+        }
+        const prevPlay = () => {
+            index--;
+            if (index <= 0) {
+                index = musicData.length;
+            }
+            playMusic(index);
+        }
+
+        // Event-Listeners 
+
+        audio.addEventListener("ended", () => {
+            nextPlay();
+        })
+        audio.onloadeddata = () => {
+            progress.max = audio.duration
+            const ds = parseInt(audio.duration % 60)
+            const dm = parseInt((audio.duration / 60) % 60)
+            ttview.textContent = dm + ':' + ds;
+        }
+        audio.ontimeupdate = () => {
+            progress.value = audio.currentTime
+        }
+        audio.addEventListener('timeupdate', () => {
+            // progress.value = audio.currentTime;
+            var cs = parseInt(audio.currentTime % 60)
+            var cm = parseInt((audio.currentTime / 60) % 60)
+            ctview.textContent = cm + ':' + cs;
+        }, false);
+
+        const changeProgressBar = () => {
+            audio.currentTime = progress.value;
+        }
+
+        // Volume-Controls
+        
+        const volumeDown = () => {
+            volumeBar.value = Number(volumeBar.value) - 20
+            audio.volume = volumeBar.value / 100
+        }
+        const volumeUp = () => {
+            volumeBar.value = Number(volumeBar.value) + 20
+            audio.volume = volumeBar.value / 100
+        }
+
+        const addList = (data) => {
+            let div = document.createElement("div");
+            div.classList.add('music');
+            div.setAttribute("data-id", data.id);
+            let html = `
+                <div class="list-thumbnail" >
+                    <img src="${data.image}" alt="" >
+                </div>
+                <div class="list-content" >
+                <h3>${data.name}</h3>
+                <small>${data.category}</small>
+                </div>
+                <button class="list-btn" >
+                <i class="material-icons">play_arrow</i>
+                    <div class="equalize">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                </button>`;
+            div.innerHTML = html;
+            musicList.append(div);
+            div.addEventListener('click', () => {
+                playMusic(data.id);
+                playerWindow.classList.add("active");
+                index = data.id;
+            });
+        }
+
+        const setMusicList = () => {
+            songs.forEach(song => addList(song));
+        }
+
+        const FirstSetUp = () => {
+            audio.src = musicData[index - 1].src;
+            setData(musicData[index - 1]);
+            setMusicList();
+        }
+        FirstSetUp()
+        
+        const equalizerBtn = e => {
+            e.target.classList.toggle("active");
+            document.querySelector(".thumbnail").classList.toggle("spin");
+        }
+
+        function setEqualizer(action = false) {
+            const elc = musicList.getElementsByClassName("equalize")[index - 1];
+            const thumb = document.querySelector(".thumbnail");
+            if (elc.classList.contains("pause")) {
+                elc.classList.remove("pause")
+            } else {
+                if (action) {
+                    elc.classList.add("pause")
+                }
+            }
+            if (thumb.classList.contains("spin") && audio.paused && action) {
+                thumb.classList.add("pause");
+            } else if (thumb.classList.contains("spin") && !audio.paused) {
+                thumb.classList.remove("pause");
+            }
+        }
+    </script>
+</body>
+</html>
